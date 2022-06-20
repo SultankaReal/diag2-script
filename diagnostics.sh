@@ -1,7 +1,6 @@
 #!/bin/zsh
 
 # Скрипт по сбору диагностики с кластера k8s. На выходе имеем zip-архив k8s.zip.
-# Файлы: log.txt, events.txt, describe_nodes.txt, pvc_pv.txt, operations.txt
 
 function diagResource {
     echo -n "Введите тип проблемного ресурса (пример: deployment, daemonset, statefulset и так далее): "
