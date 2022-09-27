@@ -26,12 +26,18 @@ function diagResource {
     date >> $FILE_EVENTS
     echo "Ивенты с сортировкой по timestamp-ам: " &>> $FILE_EVENTS
     kubectl get events --all-namespaces  --sort-by='.metadata.creationTimestamp' &>> $FILE_EVENTS
+    echo "-----------------------------------" &>> $FILE_EVENTS
+    echo "Нагрузка на воркер-ноды: " &>> $FILE_EVENTS
+    kubectl top nodes &>> $FILE_EVENTS
+    echo "-----------------------------------" &>> $FILE_EVENTS
+    echo "Нагрузка по подам во всех неймспейсах: " &>> $FILE_EVENTS
+    kubectl top pods -A &>> $FILE_EVENTS
 }
 
 function diagPvPvc {
     # PVC/PV/StorageClass
     echo -n "Есть проблема с PV/PVC? (если да, введи true; если нет, введи false): "
-    read isProblem 
+    read isProblem
     if $isProblem -eq "true"
     then
     echo -n "Введите имя pvc: "
@@ -43,7 +49,7 @@ function diagPvPvc {
     kubectl get pvc $pvc_name -n $pvc_namespace &>> $FILE_PVC_PV
     echo "-----------------------------------" &>> $FILE_PVC_PV
     kubectl get pvc $pvc_name -n $pvc_namespace -o yaml &>> $FILE_PVC_PV
-    else 
+    else
     echo "У тебя нет проблем с PV/PVC, круто!"
     rm $FILE_PVC_PV
     fi
@@ -81,14 +87,14 @@ touch $file
 done
 
 
-# Pods 
+# Pods
 date >> $FILE_LOG
 echo "-----------------------------------" &>> $FILE_LOG
 echo -n "Вы хотите ввести id или name кластера k8s? Введи i или n: "
 read id_name
 
 case $id_name in
-  i | I | id | ID) 
+  i | I | id | ID)
     echo -n "Введите id k8s кластера: "
     read cluster_id
     yc managed-kubernetes cluster get-credentials $cluster_id --external --force
@@ -112,12 +118,12 @@ case $id_name in
     yc managed-kubernetes cluster list-operations --id=$cluster_id &>> $FILE_OPERATIONS
     createArchive
     ;;
-    
+
   n | N | name | Name | NAME)
     echo -n "Введите имя k8s кластера: "
     read cluster_name
     echo -n "Введи folder-id, где находится k8s кластер: "
-    read folder_id    
+    read folder_id
     yc managed-kubernetes cluster get-credentials $(yc managed-kubernetes cluster list --folder-id=$folder_id | grep $cluster_name | awk '{print $2}') --external --force
     echo -n "Описание кластера: " &>> $FILE_LOG
     yc managed-kubernetes cluster get --name=$cluster_name &>> $FILE_LOG
